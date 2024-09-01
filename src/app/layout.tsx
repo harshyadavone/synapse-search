@@ -99,6 +99,10 @@ export default function RootLayout({
           rel="preconnect"
           href="https://www.faviconextractor.com/favicon/"
         />
+        <meta
+          name="google-site-verification"
+          content="twhv-FtvhTmMu8DrAZbHTaCKsoXamB_xxt-KjZVGEFU"
+        />
       </head>
       <body className={`${GeistSans.className} antialiased`}>
         <Link
