@@ -3,6 +3,9 @@ import { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://synapse-search.vercel.app";
 
+  // Function to escape ampersands in URLs
+  const escapeUrl = (url: string) => url.replace(/&/g, '&amp;');
+
   // List of example searches
   const exampleSearches = ["technology", "science", "programming", "AI"];
 
@@ -21,25 +24,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/results?type=aichat`,
+      url: escapeUrl(`${baseUrl}/results?type=aichat`),
       lastModified: new Date(),
       changeFrequency: "always",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/results?type=image`,
+      url: escapeUrl(`${baseUrl}/results?type=image`),
       lastModified: new Date(),
       changeFrequency: "always",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/results?type=video`,
+      url: escapeUrl(`${baseUrl}/results?type=video`),
       lastModified: new Date(),
       changeFrequency: "always",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/results?type=news`,
+      url: escapeUrl(`${baseUrl}/results?type=news`),
       lastModified: new Date(),
       changeFrequency: "always",
       priority: 0.8,
@@ -50,13 +53,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const examplePages: MetadataRoute.Sitemap = exampleSearches.flatMap(
     (search) => [
       {
-        url: `${baseUrl}/results?q=${encodeURIComponent(search)}`,
+        url: escapeUrl(`${baseUrl}/results?q=${encodeURIComponent(search)}`),
         lastModified: new Date(),
         changeFrequency: "daily",
         priority: 0.7,
       },
       {
-        url: `${baseUrl}/results?q=${encodeURIComponent(search)}&type=aichat`,
+        url: escapeUrl(`${baseUrl}/results?q=${encodeURIComponent(search)}&type=aichat`),
         lastModified: new Date(),
         changeFrequency: "daily",
         priority: 0.6,
