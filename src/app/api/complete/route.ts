@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(suggestions);
   } catch (error) {
-    console.error("Error fetching data:", error);
+    // console.error("Error fetching data:", error);
     return NextResponse.error();
   }
 }

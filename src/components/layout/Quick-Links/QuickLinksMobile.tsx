@@ -55,7 +55,7 @@ const QuickLinksMobile: React.FC = () => {
 
     // Generate favicon URL
     // https://www.faviconextractor.com/favicon/zync-v1.onrender.com?larger=true
-    console.log(newLink.url.replace(/(^\w+:|^)\/\//, ""));
+    // console.log(newLink.url.replace(/(^\w+:|^)\/\//, ""));
     const faviconUrl = `https://www.faviconextractor.com/favicon/${newLink.url.replace(
       /(^\w+:|^)\/\//,
       ""

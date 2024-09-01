@@ -47,7 +47,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
       className="flex flex-col items-start w-full overflow-hidden md:mb-6"
     >
       <Suspense fallback={<Spinner />}>
-        <FeaturedSearch searchData={data.pages[0].items} />
+        <FeaturedSearch searchData={data.pages[0].items} query={query} />
         <PersonalDetails searchData={data.pages[0].items} />
       </Suspense>
       <ResultsInfo searchInfo={data.pages[0].searchInformation} />

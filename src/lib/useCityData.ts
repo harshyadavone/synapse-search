@@ -80,7 +80,7 @@ export function useCityData({ q }: Props): CityDataState {
         }
         setState({ city, isLoading: false, error: null });
       } catch (error) {
-        console.error("Error fetching city data:", error);
+        // console.error("Error fetching city data:", error);
         setState({
           city: null,
           isLoading: false,

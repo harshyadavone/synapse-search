@@ -119,7 +119,7 @@ const QuickLinks: React.FC = () => {
 
     // Generate favicon URL
     // https://www.faviconextractor.com/favicon/zync-v1.onrender.com?larger=true
-    console.log(newLink.url.replace(/(^\w+:|^)\/\//, ""));
+    // console.log(newLink.url.replace(/(^\w+:|^)\/\//, ""));
     const faviconUrl = `https://www.faviconextractor.com/favicon/${newLink.url.replace(
       /(^\w+:|^)\/\//,
       ""
@@ -147,7 +147,6 @@ const QuickLinks: React.FC = () => {
           setLinks((prevLinks) =>
             prevLinks.filter((link) => link.id !== linkToAdd.id)
           );
-          // Optionally, show an error message to the user
           console.error("Invalid URL:", normalizedUrl);
         }
       };

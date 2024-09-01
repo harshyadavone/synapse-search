@@ -1,23 +1,33 @@
-import React, { useEffect, useState, useRef, Suspense } from "react";
-import axios from "axios";
-import { Loader2 } from "lucide-react";
+"use client";
+
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  Suspense,
+  useCallback,
+} from "react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WebSearchResult } from "@/types";
 import { SparklesIcon } from "@/components/ui/icons";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ErrorState } from "@/components/shared/common/ErrorState";
 import RelatedSearchResultsLink from "./RelatedSearchResultsLink";
 import { colors } from "@/lib/Colors";
-
-const API_TOKEN = process.env.NEXT_PUBLIC_HF_API_KEY;
+import { formatContent, sanitizeContent } from "@/lib/formatContent";
+import axios from "axios";
 
 interface FeaturedSearchProps {
   searchData: WebSearchResult[];
+  query: string;
 }
 
-const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
+export default function FeaturedSearch({
+  searchData,
+  query,
+}: FeaturedSearchProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [summary, setSummary] = useState<string>("");
+  const [streamedContent, setStreamedContent] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
@@ -38,8 +48,6 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
           container.scrollLeft < container.scrollWidth - container.clientWidth
         );
       };
-
-      // Call it once to set initial state
       handleScroll();
 
       container.addEventListener("scroll", handleScroll);
@@ -47,29 +55,65 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
     }
   }, []);
 
-  const cleanText = (text: string) => {
-    const words = text.split(" ");
-    const cleanedWords = words.filter(
-      (word, index) => word !== words[index + 1]
-    );
-    return cleanedWords.join(" ");
-  };
-
-  const query = async (data: any) => {
+  const generateSummary = async (urls: string[], prompt: string) => {
     try {
-      const response = await axios.post(
-        "https://api-inference.huggingface.co/models/sshleifer/distilbart-cnn-12-6",
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${API_TOKEN}`,
-            "Content-Type": "application/json",
-          },
+      const response = await fetch("/api/scrape", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ urls, prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Response body is not readable");
+      }
+
+      const decoder = new TextDecoder();
+      let accumulatedContent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.trim() !== "") {
+            try {
+              // Find the first occurrence of a valid JSON string
+              const jsonStartIndex = line.indexOf('"');
+              if (jsonStartIndex !== -1) {
+                const jsonEndIndex = line.lastIndexOf('"');
+                if (jsonEndIndex > jsonStartIndex) {
+                  const jsonContent = line.substring(
+                    jsonStartIndex,
+                    jsonEndIndex + 1
+                  );
+                  const content = JSON.parse(jsonContent);
+                  accumulatedContent += content;
+                }
+              }
+            } catch (parseError) {
+              console.error("Error parsing line:", parseError);
+            }
+          }
         }
-      );
-      return response.data;
+
+        setStreamedContent(accumulatedContent);
+        if (summaryRef.current) {
+          summaryRef.current.scrollTop = summaryRef.current.scrollHeight;
+        }
+      }
+
+      return accumulatedContent;
     } catch (error) {
-      console.error("Error querying the model:", error);
+      // console.error("Error generating summary:", error);
       throw error;
     }
   };
@@ -82,34 +126,14 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
     if (effectRan.current === false) {
       const getSummary = async () => {
         setIsGenerating(true);
-
-        setSummary("");
+        setStreamedContent("");
         setError(null);
 
         try {
-          const combinedDescription = searchData
-            .map((item) => item.description || item.snippet || "")
-            .join(" ");
+          const urls = searchData.map((item) => item.link);
+          const prompt = `Answer the query: ${query}`;
 
-          const prompt = `Summarize the following search results:
-
-        ${combinedDescription}
-
-        Provide a clear and concise summary that captures the main points and addresses the user's search intent.`;
-
-          const response = await query({ inputs: prompt });
-
-          if (response && response[0] && response[0].summary_text) {
-            const cleanedSummary = cleanText(response[0].summary_text);
-            const words = cleanedSummary.split(" ");
-            for (let i = 0; i < words.length; i++) {
-              await new Promise((resolve) => setTimeout(resolve, 50));
-              setSummary((prev) => prev + (i > 0 ? " " : "") + words[i]);
-              if (summaryRef.current) {
-                summaryRef.current.scrollTop = summaryRef.current.scrollHeight;
-              }
-            }
-          }
+          await generateSummary(urls, prompt);
         } catch (err: any) {
           setError(
             err.message || "An error occurred while generating the summary."
@@ -126,7 +150,14 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
         effectRan.current = true;
       };
     }
-  }, [searchData]);
+  }, [searchData, query]);
+
+  const sanitizeAndFormatHTML = useCallback(
+    (html: string) => ({
+      __html: sanitizeContent(formatContent(html)),
+    }),
+    []
+  );
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
@@ -139,9 +170,7 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
   };
 
   if (error) {
-    return (
-      <ErrorState error={error} />
-    );
+    return <ErrorState error={error} />;
   }
 
   return (
@@ -158,7 +187,18 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
         </span>
       </h2>
       <AnimatePresence>
-        {summary && (
+        {isGenerating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-4"
+          >
+            <Loader2 className="animate-spin h-5 w-5 text-indigo-500" />
+          </motion.div>
+        )}
+        {streamedContent && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -167,12 +207,10 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
             className="relative overflow-hidden mb-8"
             ref={summaryRef}
           >
-            <p className="text-lg text-foreground max-w-4xl  leading-relaxed">
-              {summary}
-              {/* {isGenerating && (
-                <span className="inline-block  w-1 h-6 ml-1 bg-primary animate-pulse" />
-              )} */}
-            </p>
+            <div
+              className="text-lg text-foreground max-w-4xl leading-relaxed prose prose-sm dark:prose-invert text-gray-700 dark:text-gray-300"
+              dangerouslySetInnerHTML={sanitizeAndFormatHTML(streamedContent)}
+            ></div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -227,6 +265,4 @@ const FeaturedSearch: React.FC<FeaturedSearchProps> = ({ searchData }) => {
       </div>
     </motion.div>
   );
-};
-
-export default FeaturedSearch;
+}

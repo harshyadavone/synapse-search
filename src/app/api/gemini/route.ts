@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // Return the stream as a StreamingTextResponse
     return new StreamingTextResponse(stream);
   } catch (error) {
-    console.error("Detailed error in Gemini API:", error);
+    // console.error("Detailed error in Gemini API:", error);
     if (error instanceof Error) {
       return new Response(`Error: ${error.message}`, { status: 500 });
     }

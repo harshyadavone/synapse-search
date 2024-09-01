@@ -25,7 +25,7 @@ const GeminiResults: React.FC<GeminiResultsProps> = ({ query }) => {
   const { complete, completion, isLoading } = useCompletion({
     api: "/api/gemini",
     onError: (error) => {
-      console.error("Completion error:", error);
+      // console.error("Completion error:", error);
       setError(`Failed to fetch AI-powered results: ${error.message}`);
     },
   });
@@ -66,7 +66,7 @@ const GeminiResults: React.FC<GeminiResultsProps> = ({ query }) => {
     try {
       await complete(query);
     } catch (err) {
-      console.error("Error fetching Gemini response:", err);
+      // console.error("Error fetching Gemini response:", err);
       setError(
         `Failed to fetch AI-powered results: ${
           err instanceof Error ? err.message : "Unknown error"

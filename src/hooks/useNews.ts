@@ -46,23 +46,12 @@ const fetchNews = async ({
 }: QueryFunctionContext<[string, string], number>): Promise<NewsResponse> => {
   const [_, searchQuery] = queryKey;
   try {
-    const from = new Date();
-    from.setDate(from.getDate() - 30); // Get articles from the last 30 days
-    const fromDate = from.toISOString().split("T")[0]; // Format the date as YYYY-MM-DD
-
-    const response = await axios.get<NewsResponse>(
-      `https://newsapi.org/v2/everything`,
-      {
-        params: {
-          apiKey: NEWS_API_KEY,
-          q: searchQuery,
-          from: fromDate,
-          sortBy: "popularity",
-          pageSize: 10,
-          page: pageParam,
-        },
-      }
-    );
+    const response = await axios.get<NewsResponse>("/api/news", {
+      params: {
+        q: searchQuery,
+        page: pageParam,
+      },
+    });
 
     return response.data;
   } catch (error) {

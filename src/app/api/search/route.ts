@@ -239,7 +239,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Error fetching search results:", error);
+    // console.error("Error fetching search results:", error);
     return NextResponse.json(
       { error: "An error occurred while processing your request" },
       { status: 500 }
