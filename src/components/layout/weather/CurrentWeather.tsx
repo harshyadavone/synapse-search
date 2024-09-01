@@ -6,7 +6,7 @@ export function CurrentWeather({
   weather: WeatherTypes;
 }): React.ReactElement {
   return (
-    <div className="p-8 rounded-xl shadow-lg relative overflow-hidden">
+    <div className="py-5 rounded-xl shadow-lg relative overflow-hidden">
       {/* Add a subtle background shape */}
       <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-xl opacity-50 transform translate-x-1/2 -translate-y-1/2"></div>
 

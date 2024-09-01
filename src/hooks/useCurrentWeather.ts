@@ -4,14 +4,14 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
 
 export function useCurrentWeather(
-  city: City | null
+  city: string
 ): UseQueryResult<CurrentWeather, Error> {
   return useQuery<CurrentWeather, Error>({
-    queryKey: ["currentWeather", city?.name],
+    queryKey: ["currentWeather", city],
     queryFn: async () => {
       if (!city) throw new Error("City data is not available");
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city.name}&units=metric&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`
       );
       if (!response.ok)
         throw new Error(`Failed to fetch weather data: ${response.statusText}`);

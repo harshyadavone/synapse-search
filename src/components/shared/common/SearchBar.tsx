@@ -169,6 +169,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ initialQuery = "" }) => {
     >
       <div className="relative w-full md:pl-9 overflow-hidden">
         <input
+          autoFocus
           ref={inputRef}
           type="text"
           value={query}

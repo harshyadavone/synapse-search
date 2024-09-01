@@ -1,12 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useWeather } from "@/hooks/useWeather";
 import Link from "next/link";
+import { Check } from "lucide-react";
 
 export default function WeatherWidget(): React.ReactElement {
+  const [city, setCity] = useState<string>("");
+  const [showCityInput, setShowCityInput] = useState<boolean>(false);
   const { currentWeather: weatherData, isLoading, error } = useWeather();
   const { data: weather } = weatherData;
-  // This line is splitting the location string into an array of words based on the comma separator. Then it's slicing the array to remove the last word (country). This is done to display the location in a more readable format - it gets rid of the country name in the location string and only displays the city name.
   const splittedLocation = weather?.location.split(",").slice(0, -1);
+
+  useEffect(() => {
+    const storedCity = localStorage.getItem("selectedCity");
+    if (!storedCity) {
+      setShowCityInput(true);
+    }
+  }, []);
+
+  const handleCitySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (city) {
+      localStorage.setItem("selectedCity", city);
+      setShowCityInput(false);
+      window.location.reload(); // Reload to fetch weather for the new city
+    }
+  };
+
+  if (showCityInput) {
+    return (
+      <div className="p-2 rounded-lg flex items-center justify-center h-10 md:h-12 w-48 md:w-60 bg-background/80 backdrop-blur-sm border border-border">
+        <form onSubmit={handleCitySubmit} className="w-full">
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Enter city name, press Enter"
+            className="w-full bg-transparent text-sm text-foreground placeholder-muted-foreground focus:outline-none"
+          />
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div>
