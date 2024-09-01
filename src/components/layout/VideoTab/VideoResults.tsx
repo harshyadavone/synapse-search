@@ -63,7 +63,7 @@ const VideoResults: React.FC<{ query: string }> = ({ query }) => {
     (page) => page.items && page.items.length > 0
   );
 
-  if (!hasVideos) {
+  if (!hasVideos || !query || query.length < 1) {
     return <NoResultsState />;
   }
 

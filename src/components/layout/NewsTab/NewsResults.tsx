@@ -61,7 +61,7 @@ const NewsResults: React.FC<{ query: string }> = ({ query }) => {
     (page) => page.articles && page.articles.length > 0
   );
 
-  if (!hasArticles) {
+  if (!hasArticles || !query || query.length < 1) {
     return <NoResultsState />;
   }
 
