@@ -2,40 +2,34 @@ import Link from "next/link";
 
 export default function Footer({ onCustomize }: { onCustomize: () => void }) {
   return (
-    <footer className="w-full mt-16 mb-4 text-center text-sm text-muted-foreground">
-      <p>© 2024 Synapse. All rights reserved.</p>
-      <div className="mt-4 flex justify-center flex-wrap gap-4">
+    <footer className="w-full mb-2 mt-16 text-center text-sm text-muted-foreground">
+      <div className="mt-4 flex flex-row items-center justify-center gap-3 mb-2">
         <Link
-          href="/privacy"
-          className="hover:text-primary transition-colors duration-300"
+          href="https://github.com/harshyadavone/synapse-search"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-muted-foreground/80 transition-colors hover:underline"
         >
-          Privacy
+          GitHub
         </Link>
         <Link
-          href="/terms"
-          className="hover:text-primary transition-colors duration-300"
+          href="https://twitter.com/harshyadavone"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-muted-foreground/80 transition-colors hover:underline"
         >
-          Terms
+          Twitter
         </Link>
         <Link
-          href="/about"
-          className="hover:text-primary transition-colors duration-300"
+          href="https://www.linkedin.com/in/harshdana"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-muted-foreground/80 transition-colors hover:underline"
         >
-          About
+          LinkedIn
         </Link>
-        <Link
-          href="/contact"
-          className="hover:text-primary transition-colors duration-300"
-        >
-          Contact
-        </Link>
-        <button
-          onClick={onCustomize}
-          className="hover:text-primary transition-colors duration-300"
-        >
-          Customize Homepage
-        </button>
       </div>
+      <p>© 2024 Synapse. All rights reserved.</p>
     </footer>
   );
 }
