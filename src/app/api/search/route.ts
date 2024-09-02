@@ -238,11 +238,54 @@ export async function GET(request: NextRequest) {
     await cache.set(cacheKey, JSON.stringify(result));
 
     return NextResponse.json(result);
-  } catch (error) {
-    // console.error("Error fetching search results:", error);
-    return NextResponse.json(
-      { error: "An error occurred while processing your request" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error("Error fetching search results:", error);
+
+    let errorMessage = "An unexpected error occurred";
+    let statusCode = 500;
+
+    if (error instanceof Response) {
+      try {
+        const errorData = await error.json();
+        const { error: apiError } = errorData;
+
+        if (apiError) {
+          const { code, message, status } = apiError;
+
+          switch (status) {
+            case "RESOURCE_EXHAUSTED":
+              errorMessage = message.includes("dailyLimitExceeded")
+                ? "Daily quota for Google search API has been exceeded"
+                : "API quota has been exhausted";
+              statusCode = 429;
+              break;
+            case "PERMISSION_DENIED":
+              errorMessage =
+                "Permission denied. Please check API key and permissions";
+              statusCode = 403;
+              break;
+            case "INVALID_ARGUMENT":
+              errorMessage = "Invalid request parameters";
+              statusCode = 400;
+              break;
+            default:
+              errorMessage = message || "An error occurred with the Google API";
+              statusCode = code || error.status || 500;
+          }
+        }
+      } catch (jsonError) {
+        errorMessage = "An error occurred while processing the API response";
+        statusCode = error.status || 500;
+      }
+    } else if (error instanceof Error) {
+      if (error.message.includes("dailyLimitExceeded")) {
+        errorMessage = "Google search API daily limit exceeded";
+        statusCode = 429;
+      } else {
+        errorMessage = "A network error occurred while fetching search results";
+      }
+    }
+
+    return NextResponse.json({ error: errorMessage }, { status: statusCode });
   }
 }

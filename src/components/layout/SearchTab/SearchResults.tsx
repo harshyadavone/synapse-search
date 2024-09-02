@@ -22,6 +22,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
     data,
     isLoading,
     isError,
+    error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -35,7 +36,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
   // }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState />;
+  if (isError)
+    return (
+      <ErrorState
+        error={error?.message || "An error occurred while fetching results"}
+      />
+    );
   if (!data || !data.pages[0]?.items?.length)
     return <NoResultsState query={query} />;
 
