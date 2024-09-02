@@ -26,13 +26,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
     hasNextPage,
     isFetchingNextPage,
   } = useSearch(query, "searchTypeUndefined");
-  const { ref, inView } = useInView();
+  // const { ref, inView } = useInView();
 
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  // useEffect(() => {
+  //   if (inView && hasNextPage && !isFetchingNextPage) {
+  //     fetchNextPage();
+  //   }
+  // }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) return <LoadingState />;
   if (isError) return <ErrorState />;
@@ -65,7 +65,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
         </ul>
       </AnimatePresence>
       {hasNextPage && (
-        <div ref={ref} className="w-full text-center py-4">
+        <div className="w-full text-center py-4">
           {isFetchingNextPage ? (
             <Loader className="animate-spin text-3xl text-primary mx-auto" />
           ) : (
