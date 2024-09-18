@@ -911,9 +911,9 @@
 }
 
 /* background for mobile quick links */
-.quick-link {
+/* .quick-link {
   background-color: hsl(var(--primary) / 0.02);
-}
+} */
 
 .quick-link-item {
   background-color: hsl(var(--primary) / 0.03);

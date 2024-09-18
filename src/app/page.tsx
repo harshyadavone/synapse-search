@@ -62,7 +62,7 @@ export default function Home(): React.ReactElement {
       <div className="flex-grow flex flex-col items-center justify-center p-4 md:p-8 w-full max-w-5xl mx-auto">
         {userPreferences.showLogo && (
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-6xl font-semibold text-primary mb-4">
+            <h1 className="text-4xl md:text-6xl font-semibold text-primary mb-4">
               Synapse
             </h1>
             <p className="text-md md:text-lg text-muted-foreground">

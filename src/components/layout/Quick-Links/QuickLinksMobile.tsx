@@ -64,7 +64,7 @@ const QuickLinksMobile: React.FC = () => {
     // Create the link object
     const linkToAdd: QuickLink = {
       id: Date.now().toString(),
-      title: newLink.title || new URL(normalizedUrl).hostname,
+      title: newLink.title || normalizedUrl.split("/")[2].split(".")[0],
       url: normalizedUrl,
       icon: faviconUrl,
     };
@@ -147,76 +147,99 @@ const QuickLinksMobile: React.FC = () => {
     },
     []
   );
+
   return (
-    <div className="mt-4 py-3 px-2 w-full quick-link rounded-xl">
-      <div className="flex flex-row items-center overflow-x-auto space-x-2 no-scrollbar">
-        {links.map((link) => (
-          <div
-            key={link.id}
-            className="relative flex-shrink-0"
-            onTouchStart={() => handleTouchStart(link)}
-            onTouchEnd={handleTouchEnd}
-            onTouchMove={handleTouchMove}
-            onClick={() => handleLinkClick(link)}
-          >
+    <div className="w-full quick-link">
+      <div className="grid grid-cols-2 gap-1">
+        {links.map((link, index) => {
+          // Determine if the current item is the last item in its row
+          const isLastRowSingleItem =
+            links.length % 2 !== 0 && index === links.length - 1;
+          const isLeftLastItem =
+            links.length % 2 === 0 && index === links.length - 2;
+          const isRightLastItem =
+            links.length % 2 === 0 && index === links.length - 1;
+
+          return (
             <div
-              className={`flex flex-col items-center justify-center rounded-full gap-3 w-[3.5rem] h-[3.5rem] transition-all  duration-200 ${
-                activeMenu === link.id
-                  ? "scale-125 shadow-lg bg-accent/50"
-                  : "quick-link-item"
-              }`}
+              key={link.id}
+              className="relative"
+              onTouchStart={() => handleTouchStart(link)}
+              onTouchEnd={handleTouchEnd}
+              onTouchMove={handleTouchMove}
+              onClick={() => handleLinkClick(link)}
+              onContextMenu={(e) => e.preventDefault()} // Prevent the context menu
             >
-              <div className="flex flex-col items-center space-y-2">
-                {link.icon.startsWith("http") ? (
-                  <img
-                    src={link.icon}
-                    alt={link.title}
-                    className="w-9 h-9 object-contain"
-                    onError={(error) => console.log(error)}
-                  />
-                ) : (
-                  <div className="w-9 h-9 bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold">
-                    {link.icon}
-                  </div>
-                )}
-              </div>
-            </div>
-            {activeMenu === link.id && (
               <div
-                id={`quick-link-${link.id}`}
-                className="absolute inset-x-0 bottom-0 flex items-center justify-center z-10 animate-slide-up"
-                style={{
-                  width: "190px",
-                }}
+                className={`flex flex-row gap-3 items-center justify-centers transition-all p-4 truncate border duration-200 ${
+                  activeMenu === link.id
+                    ? "scale-105 border border-border rounded-lg shadow-lg bg-accent/50"
+                    : "bg-muted/40 border-transparent"
+                } ${
+                  // Dynamically apply rounded corners based on index and total length
+                  (index === 0 && "rounded-tl-xl") ||
+                  (index === 1 && "rounded-tr-xl") ||
+                  (isLeftLastItem && "rounded-bl-lg") ||
+                  (isRightLastItem && "rounded-br-lg") ||
+                  (isLastRowSingleItem && "rounded-bl-lg")
+                }`}
               >
-                <div className="flex space-x-2 p-2 bg-background/80 backdrop-blur-sm rounded-full shadow-lg">
-                  <button
-                    onClick={(e) => handleEditClick(e, link)}
-                    className="p-4 bg-accent rounded-full"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => handleDeleteClick(e, link.id)}
-                    className="p-4 bg-destructive text-destructive-foreground rounded-full"
-                  >
-                    <Trash className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setActiveMenu(null)}
-                    className="p-4 bg-secondary rounded-full"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                <img
+                  src={link.icon}
+                  alt={link.title}
+                  className="w-8 h-8 object-contain"
+                  onError={(error) => console.log(error)}
+                />
+                <div className="flex flex-col gap-1 truncate">
+                  <p className="text-sm truncate capitalize">{link.title}</p>
+                  <p className="text-xs text-foreground/70 truncate mr-1">
+                    {link.url.split("https://")[1]}
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
-        ))}
+
+              {activeMenu === link.id && (
+                <div
+                  id={`quick-link-${link.id}`}
+                  className="absolute inset-x-0 bottom-1 flex items-center justify-center z-10 animate-slide-up"
+                  style={{
+                    width: "190px",
+                  }}
+                >
+                  <div className="flex space-x-2 p-2 bg-background/80 backdrop-blur-lg rounded-lg shadow-lg">
+                    <button
+                      onClick={(e) => handleEditClick(e, link)}
+                      className="p-4 bg-accent rounded-lg border border-border"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteClick(e, link.id)}
+                      className="p-4 bg-destructive text-destructive-foreground rounded-lg border border-border"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setActiveMenu(null)}
+                      className="p-4 bg-secondary rounded-lg border border-border"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
         {links.length < 12 && (
           <button
             onClick={() => setIsAddingLink(true)}
-            className="flex flex-col items-center justify-center w-[3.5rem] h-[3.5rem] quick-link-item text-secondary-foreground rounded-full flex-shrink-0"
+            className={`flex gap-2 items-center justify-center p-4 py-5 text-secondary-foreground bg-muted/40 flex-shrink-0 active:scale-[0.97] transition-all duration-200 ${
+              links.length % 2 === 0
+                ? "rounded-bl-lg rounded-br-lg"
+                : "rounded-br-lg"
+            }`}
           >
             <DashboardSquareAddIcon className="w-6 h-6 text-foreground" />
           </button>
