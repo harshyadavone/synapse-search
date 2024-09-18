@@ -3,11 +3,11 @@ import { useCurrentWeather } from "./useCurrentWeather";
 import { UseQueryResult } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
-export function useWeather(cityQuery?: string): {
+export function useWeather(): {
   currentWeather: UseQueryResult<CurrentWeather, Error>;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => void;
+  refetch: (cityQuery?: string) => Promise<boolean>; // Make refetch return a boolean
 } {
   const [city, setCity] = useState<string>("");
 
@@ -28,13 +28,26 @@ export function useWeather(cityQuery?: string): {
   }, []);
 
   const currentWeather = useCurrentWeather(city);
-
   const isLoading = currentWeather.isLoading || city === "";
 
-  const refetch = () => {
-    const newStoredCity = localStorage.getItem("selectedCity");
-    setCity(newStoredCity || "jaipur");
-    currentWeather.refetch();
+  // Refetch the weather for a specific city and return a boolean based on success
+  const refetch = async (cityQuery?: string): Promise<boolean> => {
+    const newCity =
+      cityQuery || localStorage.getItem("selectedCity") || "jaipur";
+    setCity(newCity);
+
+    try {
+      const result = await currentWeather.refetch();
+
+      // If the weather data is fetched successfully, return true
+      if (result.data) {
+        return true;
+      } else {
+        return false; // Return false if the city is invalid
+      }
+    } catch (error) {
+      return false; // Return false if there's an error during fetching
+    }
   };
 
   const error: Error | null = currentWeather.error || null;
@@ -43,6 +56,6 @@ export function useWeather(cityQuery?: string): {
     currentWeather: currentWeather,
     isLoading,
     error,
-    refetch,
+    refetch, // returns a boolean indicating success or failure
   };
 }
