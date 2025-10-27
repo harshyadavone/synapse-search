@@ -5,6 +5,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { z } from "zod";
 import { scrapeWebsite, splitAndProcessContent } from "@/lib/utils";
 import { LangChainAdapter } from "ai";
+import { COHERE_CHAT_MODEL } from "@/config";
 
 // Environment variable validation
 const envSchema = z.object({
@@ -15,7 +16,7 @@ const env = envSchema.parse(process.env);
 
 // Initialize the Cohere model
 const model = new ChatCohere({
-  model: "command-nightly",
+  model: COHERE_CHAT_MODEL,
   apiKey: env.NEXT_PUBLIC_COHERE_API_KEY,
   temperature: 0.3,
   streaming: true,
@@ -27,13 +28,13 @@ const inputSchema = z.object({
 });
 
 const promptTemplate = PromptTemplate.fromTemplate(`
-  You are a knowledgeable AI assistant with expertise in various topics. 
-  Using the information provided, respond to the following prompt. 
+  You are a knowledgeable AI assistant with expertise in various topics.
+  Using the information provided, respond to the following prompt.
   Provide a clear, concise, and informative response as if you inherently know this information.
-  
+
   Make sure to include the relevant context and information from the provided URLs.
   If the URLs are not relevant, respond with a neutral or informative message.
-  
+
   Formatting and Structure Instructions (Do not change):
   1.a Prioritize tables and visuals over text.
   1.b Use proper Markdown syntax for better readability and structure.
@@ -65,12 +66,12 @@ const promptTemplate = PromptTemplate.fromTemplate(`
   - Write as if you inherently know this information.
   - Aim for a clean, professional UI/UX in your response structure.
   - Ensure your response is coherent, well-structured, and easy to follow.
-  
+
   Information:
   {context}
-  
+
   Prompt: {prompt}
-  
+
   Response:
   `);
 
@@ -102,11 +103,11 @@ export async function POST(req: NextRequest) {
           // console.error(`Error scraping ${url}:`, error);
           return null;
         }
-      })
+      }),
     );
 
     const nonEmptyContents = scrapingResults.filter(
-      (content): content is string => content !== null && content.length > 0
+      (content): content is string => content !== null && content.length > 0,
     );
 
     if (nonEmptyContents.length === 0) {
@@ -117,7 +118,7 @@ export async function POST(req: NextRequest) {
 
     // console.time("Processing documents");
     const processedDocs = await Promise.all(
-      nonEmptyContents.map(splitAndProcessContent)
+      nonEmptyContents.map(splitAndProcessContent),
     );
     // console.timeEnd("Processing documents");
 
@@ -144,12 +145,12 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid input", details: error.errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
     return NextResponse.json(
       { error: "An unexpected error occurred" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

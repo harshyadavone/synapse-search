@@ -5,3 +5,5 @@ export const SERPAPI_API_KEY = process.env.NEXT_PUBLIC_SERPAPI_API_KEY;
 export const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
 export const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 export const NEWS_API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY;
+export const GEMINI_CHAT_MODEL = process.env.NEXT_PUBLIC_GEMINI_CHAT_MODEL;
+export const COHERE_CHAT_MODEL = process.env.NEXT_PUBLIC_COHERE_CHAT_MODEL;
